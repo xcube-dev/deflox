@@ -1,6 +1,7 @@
 # DEFLOX
 
 This repository hosts the production code of the DEFLOX project.
+Further information are hosted within the (private) [BC Sharepoint](https://brockmannconsult.sharepoint.com/sites/DEFLOX).
 
 ## DEFLOX context
 
