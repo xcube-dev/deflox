@@ -17,5 +17,14 @@ One of the goals of the project is to streamline the data collections that come 
 ## Repository contents
 
 This repository contains:
-- the code that handled the translation between the FloX-internal CSV-like format
+- the code that handled the translation between the FloX-internal CSV-like format and the xcube geoDB
 - the control code for the systematic processing
+
+## Ingestion
+
+The workflow consists of
+- checking the FTP for new data
+  - do not keep any state but ask the database
+- copying the new data over in case there is any
+- reading the data and turning it into pandas GeoDataFrames
+- ingesting the new data into the geoDB
