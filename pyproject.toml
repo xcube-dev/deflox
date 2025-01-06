@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [tool.setuptools.dynamic]
-version = {attr = "deflox.__version__"}
+version = {attr = "version.__version__"}
 
 [tool.setuptools.packages.find]
 exclude = [
