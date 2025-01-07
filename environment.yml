@@ -6,7 +6,6 @@ dependencies:
   # Python
   - python >=3.8
   # Required
-  - ftplib
   - geopandas
   - pandas
   - shapely
