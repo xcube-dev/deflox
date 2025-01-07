@@ -38,9 +38,13 @@ class DataReaderTest(unittest.TestCase):
 
         if os.path.exists("./res"):
             homedir = "./res"
+            self.tmpdir = "./temp"
         else:
             homedir = "./test/res"
+            self.tmpdir = os.environ["TMPDIR"]
 
+        print(homedir)
+        print(self.tmpdir)
         logging.basicConfig(level=logging.ERROR)
 
         os.environ["FTP_HOST"] = "127.0.0.1"
@@ -71,24 +75,25 @@ class DataReaderTest(unittest.TestCase):
 
     def test_fetch(self):
         try:
-            DataFetcher("./temp").fetch_data(73000)
-            self.assertTrue(os.path.exists("./temp"))
-            self.assertTrue(os.path.exists("./temp/240101"))
-            self.assertTrue(os.path.exists("./temp/240102"))
-            self.assertTrue(os.path.exists("./temp/240101/070101.CSV"))
-            self.assertTrue(os.path.exists("./temp/240102/070102.CSV"))
+            DataFetcher(self.tmpdir).fetch_data(73000)
+            self.assertTrue(os.path.exists(f"./{self.tmpdir}"))
+            self.assertTrue(os.path.exists(f"./{self.tmpdir}/240101"))
+            self.assertTrue(os.path.exists(f"./{self.tmpdir}/240102"))
+            self.assertTrue(os.path.exists(f"./{self.tmpdir}/240101/070101.CSV"))
+            self.assertTrue(os.path.exists(f"./{self.tmpdir}/240102/070102.CSV"))
 
-            file_name = "./temp/240101/070101.CSV"
+            file_name = f"./{self.tmpdir}/240101/070101.CSV"
             md5_expected = "76624634f71c27197d2375762784107d"
             md5_actual = self.md5sum(file_name)
             self.assertEqual(md5_expected, md5_actual)
 
-            file_name = "./temp/240102/070102.CSV"
+            file_name = f"./{self.tmpdir}/240102/070102.CSV"
             md5_expected = "b88b5d79d0b073089898072df2258114"
             md5_actual = self.md5sum(file_name)
             self.assertEqual(md5_expected, md5_actual)
         finally:
-            shutil.rmtree("./temp")
+            shutil.rmtree(f"./{self.tmpdir}/240101")
+            shutil.rmtree(f"./{self.tmpdir}/240102")
 
     @staticmethod
     def md5sum(file_name):
