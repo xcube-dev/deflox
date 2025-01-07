@@ -36,6 +36,10 @@ class DataReaderTest(unittest.TestCase):
 
     def setUp(self):
 
+        import os
+
+        print(os.getcwd())
+
         logging.basicConfig(level=logging.ERROR)
 
         os.environ["FTP_HOST"] = "127.0.0.1"
