@@ -37,13 +37,13 @@ class DataReaderTest(unittest.TestCase):
     def setUp(self):
 
         if os.path.exists("./res"):
-            homedir = "./res"
+            self.homedir = "./res"
             self.tmpdir = "./temp"
         else:
-            homedir = "./test/res"
+            self.homedir = "./test/res"
             self.tmpdir = os.environ["RUNNER_TEMP"]
 
-        print(homedir)
+        print(self.homedir)
         print(self.tmpdir)
         logging.basicConfig(level=logging.ERROR)
 
@@ -54,7 +54,10 @@ class DataReaderTest(unittest.TestCase):
 
         authorizer = DummyAuthorizer()
         authorizer.add_user(
-            os.environ["FTP_USER"], os.environ["FTP_PW"], homedir, perm="elradfmwMT"
+            os.environ["FTP_USER"],
+            os.environ["FTP_PW"],
+            self.homedir,
+            perm="elradfmwMT",
         )
 
         handler = FTPHandler
@@ -83,17 +86,23 @@ class DataReaderTest(unittest.TestCase):
             self.assertTrue(os.path.exists(f"{self.tmpdir}/240102/070102.CSV"))
 
             file_name = f"{self.tmpdir}/240101/070101.CSV"
-            md5_expected = "76624634f71c27197d2375762784107d"
-            md5_actual = self.md5sum(file_name)
-            self.assertEqual(md5_expected, md5_actual)
+            original_file_name = f"{self.homedir}/240101/070101.CSV"
+            self._assert_equal_files(file_name, original_file_name)
 
             file_name = f"{self.tmpdir}/240102/070102.CSV"
-            md5_expected = "b88b5d79d0b073089898072df2258114"
-            md5_actual = self.md5sum(file_name)
-            self.assertEqual(md5_expected, md5_actual)
+            original_file_name = f"{self.homedir}/240102/070102.CSV"
+            self._assert_equal_files(file_name, original_file_name)
+
         finally:
             shutil.rmtree(f"{self.tmpdir}/240101")
             shutil.rmtree(f"{self.tmpdir}/240102")
+
+    def _assert_equal_files(self, file_name, original_file_name):
+        with open(file_name, "r") as f:
+            expected = [line.rstrip() for line in f]
+        with open(original_file_name, "r") as f:
+            actual = [line.rstrip() for line in f]
+        self.assertEqual(expected, actual)
 
     @staticmethod
     def md5sum(file_name):
