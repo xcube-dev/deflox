@@ -6,10 +6,12 @@ dependencies:
   # Python
   - python >=3.8
   # Required
+  - ftplib
   - geopandas
   - pandas
   - shapely
   - xcube_geodb >= 1.0.8
   # Testing
+  - pyftpdlib
   - pytest >=4.4
   - pytest-cov >=2.6

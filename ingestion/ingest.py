@@ -19,9 +19,19 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+from dotenv import load_dotenv
+
+from ingestion.fetch_data import DataFetcher
+
 
 def ingest():
-    print("ingestion process started")
+    load_dotenv()
+    DataFetcher(".").fetch_data(58)
+    # get time information from geoDB
+    # subset downloaded data
+    # convert subset
+    # ingest into geoDB
+    # remove downloaded files
     print("ingestion process finished")
 
 

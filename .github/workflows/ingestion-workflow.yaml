@@ -50,7 +50,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: bc-org/deflox-integration
-          codecov_yml_path: ./codecov.yml
+          files: ./coverage.xml
   build-docker-image:
     runs-on: ubuntu-latest
     needs: [unittest]

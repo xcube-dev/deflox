@@ -25,8 +25,8 @@ import unittest
 from ingestion.flox_data_reader import DataReader
 
 
-class RawDataReaderTest(unittest.TestCase):
-    """Test case for RawDataReader."""
+class DataReaderTest(unittest.TestCase):
+    """Test case for DataReader."""
 
     def test_read(self):
         data = pkgutil.get_data("test.res", "070103.CSV").decode()

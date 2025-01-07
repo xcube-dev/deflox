@@ -1,3 +1,7 @@
+[![codecov](https://codecov.io/gh/xcube-dev/deflox/graph/badge.svg?token=Gov0FK3B71)](https://codecov.io/gh/xcube-dev/deflox)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Docker Repository on Quay](https://quay.io/repository/bcdev/deflox-ingestion/status "Docker Repository on Quay")](https://quay.io/repository/bcdev/deflox-ingestion)
+
 # DEFLOX
 
 This repository hosts the production code of the DEFLOX project.

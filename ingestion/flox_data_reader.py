@@ -22,8 +22,6 @@ import datetime
 from typing import Callable, Optional
 
 import geopandas
-import numpy as np
-from geopandas import GeoDataFrame
 import pandas as pd
 
 
@@ -98,7 +96,7 @@ class DataReader:
 
         self.df = pd.DataFrame()
 
-    def read(self, csv: str) -> GeoDataFrame:
+    def read(self, csv: str) -> geopandas.GeoDataFrame:
 
         lines = csv.split("\n")
 

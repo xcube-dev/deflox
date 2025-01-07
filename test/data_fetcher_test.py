@@ -1,0 +1,93 @@
+# The MIT License (MIT)
+# Copyright (c) 2025 by the xcube team
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+import hashlib
+import logging
+import os
+import shutil
+import unittest
+from concurrent.futures import ThreadPoolExecutor
+
+from pyftpdlib.authorizers import DummyAuthorizer
+from pyftpdlib.handlers import FTPHandler
+from pyftpdlib.servers import FTPServer
+from ingestion.fetch_data import DataFetcher
+
+
+class DataReaderTest(unittest.TestCase):
+    """Test case for DataReader."""
+
+    def setUp(self):
+
+        logging.basicConfig(level=logging.ERROR)
+
+        os.environ["FTP_HOST"] = "127.0.0.1"
+        os.environ["FTP_PORT"] = "2121"
+        os.environ["FTP_USER"] = "username"
+        os.environ["FTP_PW"] = "password"
+
+        authorizer = DummyAuthorizer()
+        authorizer.add_user(
+            os.environ["FTP_USER"], os.environ["FTP_PW"], "./res", perm="elradfmwMT"
+        )
+
+        handler = FTPHandler
+        handler.authorizer = authorizer
+        handler.passive_ports = range(60000, 65535)
+
+        self.server = FTPServer(
+            (os.getenv("FTP_HOST"), int(os.getenv("FTP_PORT"))), handler
+        )
+
+        tpe = ThreadPoolExecutor()
+        tpe.submit(
+            self.server.serve_forever,
+        )
+
+    def tearDown(self):
+        self.server.close()
+
+    def test_fetch(self):
+        try:
+            DataFetcher("./temp").fetch_data(73000)
+            self.assertTrue(os.path.exists("./temp"))
+            self.assertTrue(os.path.exists("./temp/240101"))
+            self.assertTrue(os.path.exists("./temp/240102"))
+            self.assertTrue(os.path.exists("./temp/240101/070101.CSV"))
+            self.assertTrue(os.path.exists("./temp/240102/070102.CSV"))
+
+            file_name = "./temp/240101/070101.CSV"
+            md5_expected = "76624634f71c27197d2375762784107d"
+            md5_actual = self.md5sum(file_name)
+            self.assertEqual(md5_expected, md5_actual)
+
+            file_name = "./temp/240102/070102.CSV"
+            md5_expected = "b88b5d79d0b073089898072df2258114"
+            md5_actual = self.md5sum(file_name)
+            self.assertEqual(md5_expected, md5_actual)
+        finally:
+            shutil.rmtree("./temp")
+
+    @staticmethod
+    def md5sum(file_name):
+        with open(file_name, "rb") as file_to_check:
+            data = file_to_check.read()
+            md5_actual = hashlib.md5(data).hexdigest()
+        return md5_actual
