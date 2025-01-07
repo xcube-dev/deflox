@@ -36,9 +36,10 @@ class DataReaderTest(unittest.TestCase):
 
     def setUp(self):
 
-        import os
-
-        print(os.getcwd())
+        if os.path.exists("./res"):
+            homedir = "./res"
+        else:
+            homedir = "./test/res"
 
         logging.basicConfig(level=logging.ERROR)
 
@@ -49,7 +50,7 @@ class DataReaderTest(unittest.TestCase):
 
         authorizer = DummyAuthorizer()
         authorizer.add_user(
-            os.environ["FTP_USER"], os.environ["FTP_PW"], "./res", perm="elradfmwMT"
+            os.environ["FTP_USER"], os.environ["FTP_PW"], homedir, perm="elradfmwMT"
         )
 
         handler = FTPHandler
