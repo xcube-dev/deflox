@@ -41,7 +41,7 @@ class DataReaderTest(unittest.TestCase):
             self.tmpdir = "./temp"
         else:
             homedir = "./test/res"
-            self.tmpdir = os.environ["TMPDIR"]
+            self.tmpdir = os.environ["RUNNER_TEMP"]
 
         print(homedir)
         print(self.tmpdir)
