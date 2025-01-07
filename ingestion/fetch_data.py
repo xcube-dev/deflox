@@ -18,6 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
+
 import datetime
 import os
 import re
@@ -40,6 +41,22 @@ class DataFetcher(object):
         self.ftp.set_pasv(True)
         self.data_dir = None
         self.target_dir = target_dir
+
+    def fetch_data(self, max_days: int = 2) -> None:
+        self.ftp.login(os.getenv("FTP_USER"), os.getenv("FTP_PW"))
+        self.max_days = max_days
+
+        data_dirs = []
+
+        for directory in self.ftp.nlst("."):
+            if re.search("^\\d\\d\\d\\d\\d\\d$", directory):
+                data_dirs.append(directory)
+
+        for data_dir in data_dirs:
+            self.data_dir = data_dir
+            self.ftp.dir(f"./{data_dir}", self._download_csv_file)
+
+        self.ftp.quit()
 
     def _download_csv_file(self, entry: str):
         entry = entry.split(" ")[-1]
@@ -79,19 +96,3 @@ class DataFetcher(object):
                     except Exception as exc:
                         print(exc.args)
                         time.sleep(10)
-
-    def fetch_data(self, max_days: int = 2) -> None:
-        self.ftp.login(os.getenv("FTP_USER"), os.getenv("FTP_PW"))
-        self.max_days = max_days
-
-        data_dirs = []
-
-        for directory in self.ftp.nlst("."):
-            if re.search("^\\d\\d\\d\\d\\d\\d$", directory):
-                data_dirs.append(directory)
-
-        for data_dir in data_dirs:
-            self.data_dir = data_dir
-            self.ftp.dir(f"./{data_dir}", self._download_csv_file)
-
-        self.ftp.quit()
