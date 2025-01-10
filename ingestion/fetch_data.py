@@ -41,6 +41,7 @@ class DataFetcher(object):
         self.ftp.set_pasv(True)
         self.data_dir = None
         self.target_dir = target_dir
+        self.downloaded_files = []
 
     def fetch_data(self, max_days: int = 2) -> None:
         self.ftp.login(os.getenv("FTP_USER"), os.getenv("FTP_PW"))
@@ -60,7 +61,7 @@ class DataFetcher(object):
 
     def _download_csv_file(self, entry: str):
         entry = entry.split(" ")[-1]
-        if entry.lower().endswith(".csv"):
+        if entry.lower().endswith(".csv") and not entry.lower() == "log.csv":
             td = f"{self.target_dir}/{self.data_dir}"
 
             cmd = f"MDTM ./{self.data_dir}/{entry}"
@@ -92,6 +93,7 @@ class DataFetcher(object):
                         self.ftp.retrbinary(
                             f"RETR {self.data_dir}/{entry}", file.write, 256 * 1024
                         )
+                        self.downloaded_files.append(f"{td}/{entry}")
                         break
                     except Exception as exc:
                         print(exc.args)

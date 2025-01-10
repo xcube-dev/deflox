@@ -36,7 +36,7 @@ class DataReaderTest(unittest.TestCase):
 
     def setUp(self):
 
-        if os.path.exists("./res"):
+        if os.path.exists("res"):
             self.homedir = "./res"
             self.tmpdir = "./temp"
         else:
