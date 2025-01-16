@@ -19,8 +19,10 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 import os
+import shutil
 import sys
 from datetime import datetime
+from pathlib import Path
 
 import pandas
 from dotenv import load_dotenv
@@ -57,7 +59,8 @@ def ingest():
 
     for f in data_fetcher.downloaded_files:
         print(f"reading {f}")
-        with open(temp_data_dir + "/" + f, "r") as csvfile:
+        file_path = os.path.join(temp_data_dir, f)
+        with open(file_path, "r") as csvfile:
             gdf = DataReader().read(csvfile.readlines())
         is_f_file = os.path.basename(f)[0] == "F"
         latest_time = latest_time_raw_f if is_f_file else latest_time_raw
@@ -73,7 +76,13 @@ def ingest():
         else:
             print(f"{f} does not contain any new data")
 
-    # remove downloaded files
+        os.remove(file_path)
+        parent = Path(file_path).parent.absolute()
+        files_in_dir = parent.glob("*")
+        # weirdly, this does not work with the extra 'len':
+        if len(list(files_in_dir)) == 0:
+            shutil.rmtree(parent)
+
     print("ingestion process finished")
 
 
