@@ -25,6 +25,7 @@ import shutil
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 
+from exceptiongroup import catch
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import FTPServer
@@ -43,8 +44,6 @@ class DataReaderTest(unittest.TestCase):
             self.homedir = "./test/res"
             self.tmpdir = os.environ["RUNNER_TEMP"]
 
-        print(self.homedir)
-        print(self.tmpdir)
         logging.basicConfig(level=logging.ERROR)
 
         os.environ["FTP_HOST"] = "127.0.0.1"
@@ -94,8 +93,15 @@ class DataReaderTest(unittest.TestCase):
             self._assert_equal_files(file_name, original_file_name)
 
         finally:
-            shutil.rmtree(f"{self.tmpdir}/240101")
-            shutil.rmtree(f"{self.tmpdir}/240102")
+            try:
+                shutil.rmtree(f"{self.tmpdir}/240101")
+                shutil.rmtree(f"{self.tmpdir}/240102")
+            except FileNotFoundError as fnfe:
+                if os.getenv("GITHUB_ACTIONS", False):
+                    # may happen and be ignored on CI
+                    pass
+                else:
+                    raise fnfe
 
     def _assert_equal_files(self, file_name, original_file_name):
         with open(file_name, "r") as f:
