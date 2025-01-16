@@ -80,9 +80,6 @@ class DataReaderTest(unittest.TestCase):
         try:
             DataFetcher(self.tmpdir).fetch_data(73000)
             self.assertTrue(os.path.exists(f"{self.tmpdir}"))
-            p = Path(self.tmpdir).absolute()
-            for f in p.rglob("*"):
-                print(f)
             self.assertTrue(os.path.exists(f"{self.tmpdir}/240101"))
             self.assertTrue(os.path.exists(f"{self.tmpdir}/240102"))
             self.assertTrue(os.path.exists(f"{self.tmpdir}/240101/070101.CSV"))
