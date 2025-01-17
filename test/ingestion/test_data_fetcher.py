@@ -22,6 +22,7 @@ import hashlib
 import logging
 import os
 import shutil
+import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 
@@ -70,6 +71,10 @@ class DataReaderTest(unittest.TestCase):
         tpe.submit(
             self.server.serve_forever,
         )
+        while True:
+            if self.server.accepting:
+                break
+            time.sleep(1)
 
     def tearDown(self):
         self.server.close()
