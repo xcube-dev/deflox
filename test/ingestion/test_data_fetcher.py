@@ -41,7 +41,7 @@ class DataReaderTest(unittest.TestCase):
             self.homedir = "./ingestion/res"
             self.tmpdir = "./ingestion/temp"
         else:
-            self.homedir = "./test/res"
+            self.homedir = "./test/ingestion/res"
             self.tmpdir = os.environ["RUNNER_TEMP"]
 
         logging.basicConfig(level=logging.ERROR)
@@ -71,16 +71,16 @@ class DataReaderTest(unittest.TestCase):
         tpe.submit(
             self.server.serve_forever,
         )
-        while True:
-            if self.server.accepting:
-                break
-            time.sleep(1)
 
     def tearDown(self):
         self.server.close()
 
     def test_fetch(self):
         try:
+            while True:
+                if self.server.accepting:
+                    break
+                time.sleep(1)
             DataFetcher(self.tmpdir).fetch_data(73000)
             self.assertTrue(os.path.exists(f"{self.tmpdir}"))
             self.assertTrue(os.path.exists(f"{self.tmpdir}/240101"))
