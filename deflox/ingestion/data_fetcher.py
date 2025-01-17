@@ -71,9 +71,10 @@ class DataFetcher(object):
 
             cmd = f"MDTM ./{self.data_dir}/{entry}"
             timestamp = self.ftp.voidcmd(cmd)
+            print("timestamp 1: ", timestamp)
             timestamp = timestamp.split(" ")[1]
 
-            print("timestamp:", timestamp)
+            print("timestamp 2: ", timestamp)
 
             if not re.search("\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d", timestamp):
                 return
