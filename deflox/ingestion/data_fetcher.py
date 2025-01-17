@@ -66,18 +66,28 @@ class DataFetcher(object):
 
         entry = entry.split(" ")[-1]
         if entry.lower().endswith(".csv") and not entry.lower() == "log.csv":
+            print("69")
             td = f"{self.target_dir}/{self.data_dir}"
 
             cmd = f"MDTM ./{self.data_dir}/{entry}"
             timestamp = self.ftp.voidcmd(cmd)
             timestamp = timestamp.split(" ")[1]
+
+            print("timestamp:", timestamp)
+
             if not re.search("\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d", timestamp):
                 return
+
+            print("81")
 
             last_modified_date = datetime.datetime.strptime(timestamp, "%Y%m%d%H%M%S")
             earliest_day = datetime.datetime.today() - datetime.timedelta(
                 days=self.max_days
             )
+
+            print(last_modified_date)
+            print(earliest_day)
+
             if last_modified_date <= earliest_day:
                 return
 
