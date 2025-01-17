@@ -50,7 +50,9 @@ class DataFetcher(object):
         data_dirs = []
 
         for directory in self.ftp.nlst("."):
+            print("Fetching data for ", directory)
             if re.search("^\\d\\d\\d\\d\\d\\d$", directory):
+                print("using ", directory)
                 data_dirs.append(directory)
 
         for data_dir in data_dirs:
@@ -60,6 +62,8 @@ class DataFetcher(object):
         self.ftp.quit()
 
     def _download_csv_file(self, entry: str):
+        print(f"Maybe downloading {entry}...")
+
         entry = entry.split(" ")[-1]
         if entry.lower().endswith(".csv") and not entry.lower() == "log.csv":
             td = f"{self.target_dir}/{self.data_dir}"
