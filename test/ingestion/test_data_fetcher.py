@@ -25,6 +25,7 @@ import shutil
 import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from ftplib import FTP
 
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
@@ -72,15 +73,26 @@ class DataReaderTest(unittest.TestCase):
             self.server.serve_forever,
         )
 
+        ftp_client = FTP()
+        ftp_client.connect(os.getenv("FTP_HOST"), int(os.getenv("FTP_PORT", "21")))
+        ftp_client.login(os.getenv("FTP_USER"), os.getenv("FTP_PW"))
+        ftp_client.set_pasv(True)
+
+        max_sleep = 10
+        curr_sleep = 0
+        while True and curr_sleep <= max_sleep:
+            max_sleep += 1
+            files = list(ftp_client.nlst("."))
+            if "240101" and "240102" in files:
+                break
+            print("data not yet fully loaded, waiting 1 second...")
+            time.sleep(1)
+
     def tearDown(self):
         self.server.close()
 
     def test_fetch(self):
         try:
-            while True:
-                if self.server.accepting:
-                    break
-                time.sleep(1)
             DataFetcher(self.tmpdir).fetch_data(73000)
             self.assertTrue(os.path.exists(f"{self.tmpdir}"))
             self.assertTrue(os.path.exists(f"{self.tmpdir}/240101"))
