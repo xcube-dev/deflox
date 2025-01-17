@@ -21,14 +21,14 @@
 import pkgutil
 import unittest
 
-from ingestion.flox_data_reader import DataReader
+from deflox.ingestion.flox_data_reader import DataReader
 
 
 class DataReaderTest(unittest.TestCase):
     """Test case for DataReader."""
 
     def test_read_raw(self):
-        data = pkgutil.get_data("test.res", "070103.CSV").decode()
+        data = pkgutil.get_data("test.ingestion.res", "070103.CSV").decode()
         lines = data.split("\n")
 
         rdr = DataReader()
@@ -65,7 +65,7 @@ class DataReaderTest(unittest.TestCase):
         self.assertEqual(gdf["utc_datetime"].iloc[-1], "2080-01-05 16:58:07")
 
     def test_read_raw_f(self):
-        data = pkgutil.get_data("test.res", "F070103.CSV").decode()
+        data = pkgutil.get_data("test.ingestion.res", "F070103.CSV").decode()
         lines = data.split("\n")
 
         rdr = DataReader()

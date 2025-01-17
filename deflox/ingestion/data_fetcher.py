@@ -37,7 +37,7 @@ class DataFetcher(object):
         self.max_days = None
         load_dotenv()
         self.ftp = FTP()
-        self.ftp.connect(os.getenv("FTP_HOST"), int(os.getenv("FTP_PORT")))
+        self.ftp.connect(os.getenv("FTP_HOST"), int(os.getenv("FTP_PORT", "21")))
         self.ftp.set_pasv(True)
         self.data_dir = None
         self.target_dir = target_dir

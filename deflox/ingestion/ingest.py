@@ -28,8 +28,8 @@ import pandas
 from dotenv import load_dotenv
 from xcube_geodb.core.geodb import GeoDBClient
 
-from ingestion.fetch_data import DataFetcher
-from ingestion.flox_data_reader import DataReader
+from data_fetcher import DataFetcher
+from flox_data_reader import DataReader
 
 
 def ingest():
@@ -43,6 +43,19 @@ def ingest():
     max_day_diff = (
         int(os.environ["MAX_DAY_DIFF"]) if "MAX_DAY_DIFF" in os.environ else 2
     )
+
+    mandatory_env_vars = [
+        "FTP_HOST",
+        "FTP_USER",
+        "FTP_PW",
+        "GEODB_SERVER_URL",
+        "GEODB_CLIENT_ID",
+        "GEODB_CLIENT_SECRET",
+    ]
+    for v in mandatory_env_vars:
+        if not os.getenv(v):
+            raise ValueError(f"Missing mandatory environment variable: {v}")
+
     data_fetcher = DataFetcher(temp_data_dir)
     data_fetcher.fetch_data(max_day_diff)
 
@@ -113,14 +126,20 @@ def _get_geodb_client():
     )
     client_id = os.environ["GEODB_CLIENT_ID"]
     client_secret = os.environ["GEODB_CLIENT_SECRET"]
-    auth_audience = (
+    auth_aud = (
         os.environ["GEODB_AUTH_AUD"]
         if "GEODB_AUTH_AUD" in os.environ
+        else "https://geodb.brockmann-consult.de"
+    )
+    auth_domain = (
+        os.environ["GEODB_AUTH_DOMAIN"]
+        if "GEODB_AUTH_DOMAIN" in os.environ
         else "https://xcube-users.brockmann-consult.de/api/v2"
     )
     geodb = GeoDBClient(
-        server_url, server_port, client_id, client_secret, auth_aud=auth_audience
+        server_url, server_port, client_id, client_secret, auth_aud=auth_aud
     )
+    geodb._auth_domain = auth_domain
     return geodb
 
 

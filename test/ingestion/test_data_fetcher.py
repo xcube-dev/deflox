@@ -24,13 +24,11 @@ import os
 import shutil
 import unittest
 from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
 
-from exceptiongroup import catch
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import FTPServer
-from ingestion.fetch_data import DataFetcher
+from deflox.ingestion.data_fetcher import DataFetcher
 
 
 class DataReaderTest(unittest.TestCase):
@@ -38,9 +36,9 @@ class DataReaderTest(unittest.TestCase):
 
     def setUp(self):
 
-        if os.path.exists("res"):
-            self.homedir = "./res"
-            self.tmpdir = "./temp"
+        if os.path.exists("ingestion/res"):
+            self.homedir = "./ingestion/res"
+            self.tmpdir = "./ingestion/temp"
         else:
             self.homedir = "./test/res"
             self.tmpdir = os.environ["RUNNER_TEMP"]
