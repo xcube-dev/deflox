@@ -50,9 +50,7 @@ class DataFetcher(object):
         data_dirs = []
 
         for directory in self.ftp.nlst("."):
-            print("Fetching data for ", directory)
             if re.search("^\\d\\d\\d\\d\\d\\d$", directory):
-                print("using ", directory)
                 data_dirs.append(directory)
 
         for data_dir in data_dirs:
@@ -62,14 +60,15 @@ class DataFetcher(object):
         self.ftp.quit()
 
     def _download_csv_file(self, entry: str):
-        print(f"Maybe downloading {entry}...")
-
         entry = entry.split(" ")[-1]
         if entry.lower().endswith(".csv") and not entry.lower() == "log.csv":
-            print("69")
             td = f"{self.target_dir}/{self.data_dir}"
 
+            # sometimes, the MDTM command responds with "226 Transfer Complete"
+            # instead of the correct timestamp. We are trying 10 times before
+            # giving up, that usually is enough.
             count = 0
+            timestamp = ""
             while True and count < 10:
                 count += 1
                 cmd = f"MDTM ./{self.data_dir}/{entry}"
@@ -80,23 +79,19 @@ class DataFetcher(object):
                 else:
                     break
 
-            print("timestamp 1: ", timestamp)
+            if "Transfer" in timestamp:
+                raise RuntimeError(
+                    "FTP server does not implement MDTM command correctly."
+                )
+
             timestamp = timestamp.split(" ")[1]
-
-            print("timestamp 2: ", timestamp)
-
             if not re.search("\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d", timestamp):
                 return
-
-            print("81")
 
             last_modified_date = datetime.datetime.strptime(timestamp, "%Y%m%d%H%M%S")
             earliest_day = datetime.datetime.today() - datetime.timedelta(
                 days=self.max_days
             )
-
-            print(last_modified_date)
-            print(earliest_day)
 
             if last_modified_date <= earliest_day:
                 return

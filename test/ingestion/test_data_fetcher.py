@@ -73,21 +73,6 @@ class DataReaderTest(unittest.TestCase):
             self.server.serve_forever,
         )
 
-        ftp_client = FTP()
-        ftp_client.connect(os.getenv("FTP_HOST"), int(os.getenv("FTP_PORT", "21")))
-        ftp_client.login(os.getenv("FTP_USER"), os.getenv("FTP_PW"))
-        ftp_client.set_pasv(True)
-
-        max_sleep = 10
-        curr_sleep = 0
-        while True and curr_sleep <= max_sleep:
-            max_sleep += 1
-            files = list(ftp_client.nlst("."))
-            if "240101" and "240102" in files:
-                break
-            print("data not yet fully loaded, waiting 1 second...")
-            time.sleep(1)
-
     def tearDown(self):
         self.server.close()
 
