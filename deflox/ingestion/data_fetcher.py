@@ -69,8 +69,17 @@ class DataFetcher(object):
             print("69")
             td = f"{self.target_dir}/{self.data_dir}"
 
-            cmd = f"MDTM ./{self.data_dir}/{entry}"
-            timestamp = self.ftp.voidcmd(cmd)
+            count = 0
+            while True and count < 10:
+                count += 1
+                cmd = f"MDTM ./{self.data_dir}/{entry}"
+                timestamp = self.ftp.voidcmd(cmd)
+                if "Transfer" in timestamp:
+                    time.sleep(1)
+                    continue
+                else:
+                    break
+
             print("timestamp 1: ", timestamp)
             timestamp = timestamp.split(" ")[1]
 
