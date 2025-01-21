@@ -18,16 +18,16 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-import datetime
 import re
+from datetime import datetime
 from typing import Callable, Optional, List
 
 import geopandas
+import numpy as np
 import pandas as pd
 
 
 class Var:
-
     def __init__(
         self, var_name: str, index: int, converter_func: Optional[Callable] = None
     ):
@@ -46,22 +46,31 @@ class DataReader:
     """
 
     def __init__(self):
-
-        self.offset = 0
         self.df = pd.DataFrame()
 
-    def read(self, lines: List[str]) -> geopandas.GeoDataFrame:
+    def read(
+        self,
+        raw_lines: List[str],
+        processed_lines: Optional[List[str]] = None,
+        var_name: Optional[str] = None,
+    ) -> geopandas.GeoDataFrame:
+        if processed_lines:
+            return self._read_processed(raw_lines[0], processed_lines, var_name)
+        else:
+            return self._read_raw(raw_lines)
+
+    def _read_raw(self, raw_lines: List[str]) -> geopandas.GeoDataFrame:
         local_datetime_values = []
         utc_datetime_values = []
 
-        first_line = lines[0]
+        first_line = raw_lines[0]
         is_f_prefixed_data = len(first_line.split(";")) == 42
         self._initialize_vars(is_f_prefixed_data)
 
         cursor = 0
-        while cursor + 6 <= len(lines):
+        while cursor + 6 <= len(raw_lines):
             skip_block = False
-            current_block = lines[cursor : cursor + 6]
+            current_block = raw_lines[cursor : cursor + 6]
             cursor += 6
 
             meta = current_block[0].split(";")
@@ -80,7 +89,7 @@ class DataReader:
                         f"Skipping respective block of measurements."
                     )
                     for line_index, line in enumerate(
-                        lines[cursor - 6 + core_var.index + 1 :]
+                        raw_lines[cursor - 6 + core_var.index + 1 :]
                     ):
                         if re.match(
                             "^\\d+;\\d\\d\\d\\d\\d\\d;\\d\\d\\d\\d\\d\\d;.*;IT_WR.us.=",
@@ -232,3 +241,51 @@ class DataReader:
                 Var("Temp2", 54, float),
                 Var("MultiCal", 56, int),
             ]
+
+    def _read_processed(
+        self, first_header_line: str, processed_lines: List[str], var_name: str
+    ) -> geopandas.GeoDataFrame:
+        keys = first_header_line.split(";")
+        date = keys[1]
+        lat = float(keys[28].replace(" N", "").replace(" S", ""))
+        lon = float(keys[30].replace(" E", "").replace(" W", ""))
+
+        local_datetime_values = []
+        times = [t.replace('"', "") for t in processed_lines[0].split(";")[1:]]
+        for time in times:
+            local_datetime_values.append(
+                datetime.strptime(f"20{date} {time}", "%Y%m%d %H_%M_%S").strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+            )
+
+        wavelengths = []
+        core_var_values = []
+
+        for line in processed_lines[1:]:
+            if line:
+                values = line.split(";")
+                for col_number, value in enumerate(values[1:]):
+                    if len(core_var_values) <= col_number:
+                        core_var_values.append([])
+                        wavelengths.append([])
+                    val = float(value) if value != "#N/D" else None
+                    core_var_values[col_number].append(val)
+                    wavelengths[col_number].append(float(values[0]))
+
+        lat_values = np.repeat(lat, len(local_datetime_values))
+        lon_values = np.repeat(lon, len(local_datetime_values))
+
+        self.df["local_datetime"] = local_datetime_values
+        self.df["GPS_lon"] = lon_values
+        self.df["GPS_lat"] = lat_values
+        self.df[f"{var_name}_wl"] = wavelengths
+        self.df[var_name] = core_var_values
+
+        gdf = geopandas.GeoDataFrame(
+            self.df,
+            geometry=geopandas.points_from_xy(self.df.GPS_lon, self.df.GPS_lat),
+            crs="EPSG:4326",
+        )
+
+        return gdf

@@ -21,11 +21,9 @@
 import hashlib
 import logging
 import os
-import shutil
-import time
 import unittest
+import shutil
 from concurrent.futures import ThreadPoolExecutor
-from ftplib import FTP
 
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
@@ -37,7 +35,6 @@ class DataReaderTest(unittest.TestCase):
     """Test case for DataReader."""
 
     def setUp(self):
-
         if os.path.exists("ingestion/res"):
             self.homedir = "./ingestion/res"
             self.tmpdir = "./ingestion/temp"
